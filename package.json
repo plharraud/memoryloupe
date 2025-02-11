@@ -1,5 +1,6 @@
 {
   "name": "memoryloupe",
+  "publisher": "plharraud",
   "displayName": "memoryloupe - gcc mapfile codelenses",
   "description": "codelenses about gcc compiled executable symbol size and stack usage",
   "keywords": [
