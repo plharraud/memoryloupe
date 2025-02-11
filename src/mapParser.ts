@@ -15,9 +15,9 @@ export class MapParser {
 
         const lines = await readLines(mapFileUri);
 
-        const symbol_complete = /^\s(\S+)\s+(0x\S+)\s+(0x\S+)\s+(\S+)$/;
+        const symbol_complete = /^\s(\S+)\s+(0x\S+)\s+(0x\S+)\s+(.+)$/;
         const symbol_only = /^\s(\S+)$/;
-        const symbol_remaining = /^\s+(0x\S+)\s+(0x\S+)\s+(\S+)$/;
+        const symbol_remaining = /^\s+(0x\S+)\s+(0x\S+)\s+(.+)$/;
         const object_loads = /^(LOAD|START|END)\s/;
         const output = /^OUTPUT/;
 

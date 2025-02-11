@@ -17,7 +17,7 @@ export class SuParser {
     async parse(suFileUri: vscode.Uri) {
         const lines = await readLines(suFileUri);
 
-        const stackusage = /^(\S+):(\d+):(\d+):(\S+)\t(\d+)\t(static|dynamic|bounded)$/;
+        const stackusage = /^(.+):(\d+):(\d+):(\S+)\t(\d+)\t(static|dynamic|bounded)$/;
 
         let symbols: Symbol[] = [];
 
