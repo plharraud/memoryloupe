@@ -24,7 +24,9 @@ Requires an extension that provides symbol information (Outline panel in the Exp
 
 Open a C file, the codelenses should appear next to the symbols.
 
-The extension activates, finds and parses `.map` and `.su` files witin the workspace.
+The extension activates, finds and parses `.map` and `.su` files witin the current workspace.
+
+Run `Memoryloupe: Select build folder` to choose the location of the files to be parsed, if you have multiple build dirs.
 
 ## Build
 
@@ -44,21 +46,23 @@ This extension contributes the following settings:
 
 ## Roadmap
 
-- selector (prompt, like when selecting compiler) for build dir to search for .map and .su files, and auto guess
 - codelens format configuration (templating) in configuration
-- smarter symbol store, to merge su and map symbols, deduplicate, dispose etc.
-- tests
+- build dir saved in configuration
+- use quickpicks instead of filepicker for selecting build dir
 - error handling
+- tests
 
 ## Known Issues
 
-- duplicate symbols, not filtering by file: symbol information can be mismatched if there are multiple symbols with the same name
-- multiple mapfiles not supported (last parsed overwrites previous)
-- su symbols array grows endlessly
+- duplicate symbols, not filtering by file: symbol information can be mismatched if there are multiple symbols with the same name, although this should not be possible
 - not tested on c++ project, although the extension activates for cpp files, it could work
 - only support utf-8 file encoding
 
 ## Release Notes
+
+### 1.1.0
+
+- added `Select build folder` command
 
 ### 1.0.0
 

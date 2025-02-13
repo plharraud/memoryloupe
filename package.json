@@ -24,7 +24,7 @@
     "workspace"
   ],
   "pricing": "Free",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "engines": {
     "vscode": "^1.86.0"
@@ -39,7 +39,12 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": []
+    "commands": [
+      {
+        "command": "memoryloupe.selectBuildDir",
+        "title": "Memoryloupe: Select build directory"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

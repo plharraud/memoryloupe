@@ -1,40 +1,54 @@
 import * as vscode from 'vscode';
-import { mapParser } from './extension';
-import { suParser } from './extension';
 import { SymbolStatus } from './types/symbol';
+import { SymbolStore } from './symbolStore';
+
+async function getDocumentSymbols(documentUri: vscode.Uri): Promise<vscode.SymbolInformation[]> {
+    return await vscode.commands.executeCommand(
+        "vscode.executeDocumentSymbolProvider",
+        documentUri,
+    );
+}
 
 export class SymbolCodeLensProvider implements vscode.CodeLensProvider {
     private _onDidChangeCodeLenses: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
     readonly onDidChangeCodeLenses: vscode.Event<void> = this._onDidChangeCodeLenses.event;
 
+    private symbolStore: SymbolStore;
+
+    constructor(symbolStore: SymbolStore) {
+        this.symbolStore = symbolStore;
+    }
+
     async provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.CodeLens[]> {
         console.log("providing codelenses for %s", document.fileName);
 
-        const documentSymbols: vscode.SymbolInformation[] = await vscode.commands.executeCommand(
-            "vscode.executeDocumentSymbolProvider",
-            document.uri,
-        );
+        const documentSymbols = await getDocumentSymbols(document.uri);
         if (!documentSymbols) { return []; }
 
         const lenses: vscode.CodeLens[] = [];
+
         documentSymbols.forEach((ds) => {
             const symbol_name = ds.name.split("(")[0];
-            const mapfile_symbol = mapParser.symbols.find(s => s.name === symbol_name);
-            const sufile_symbol = suParser.symbols.find(s => s.name === symbol_name);
+            const symbol = this.symbolStore.getByName(symbol_name);
 
-            if (mapfile_symbol) {
-                let title = `size: ${mapfile_symbol.size}B`;
-                if (mapfile_symbol.status === SymbolStatus.discarded) {
-                    title += " (discarded)";
+            if (symbol) {
+                let bits = [];
+                bits.push(`size: ${symbol.size}B`);
+
+
+                if (symbol.stack_usage) {
+                    bits.push(` stack: ${symbol.stack_usage}B`);
                 }
 
-                if (sufile_symbol) {
-                    title += ` stack: ${sufile_symbol.stack_usage}B`;
+                if (symbol.address) {
+                    bits.push(`0x${symbol.address.toString(16)}`);
+                } else if (symbol.status === SymbolStatus.discarded) {
+                    bits.push("discarded");
                 }
 
                 lenses.push(new vscode.CodeLens(
                     ds.location.range,
-                    { title, command: "" }
+                    { title: bits.join(", "), command: "" }
                 ));
             }
         });

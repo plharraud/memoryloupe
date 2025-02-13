@@ -1,16 +1,20 @@
-export enum SymbolStatus {
-    "used",
-    "discarded",
+export interface SymbolArray {
+    [name: string]: Symbol;
 }
 
 export interface Symbol {
     name: string;
     section?: string;
-    status?: SymbolStatus;
-    size?: number;
     address?: number;
+    size?: number;
+    status?: SymbolStatus;
     object?: string;
-    stack_usage?: number;
     source_file?: string;
+    stack_usage?: number;
     line?: number;
+}
+
+export enum SymbolStatus {
+    "used",
+    "discarded",
 }

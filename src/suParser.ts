@@ -1,47 +1,33 @@
 import * as vscode from 'vscode';
 import { readLines } from './common';
-import { Symbol } from './types/symbol';
+import { SymbolArray } from './types/symbol';
+import { log } from './outputChannel';
 
-export class SuParser {
+const stackusage = /^(.+):(\d+):(\d+):(\S+)\t(\d+)\t(static|dynamic|bounded)$/;
 
-    symbols: Symbol[];
+export async function parseSu(suUri: vscode.Uri) {
+    log(`parsing ${suUri.fsPath}`);
 
-    constructor() {
-        this.symbols = [];
-    }
+    const lines = await readLines(suUri);
 
-    clear() {
-        this.symbols = [];
-    }
+    let symbols: SymbolArray = {};
 
-    async parse(suFileUri: vscode.Uri) {
-        const lines = await readLines(suFileUri);
+    for (const line of lines) {
+        let matches;
 
-        const stackusage = /^(.+):(\d+):(\d+):(\S+)\t(\d+)\t(static|dynamic|bounded)$/;
+        if (matches = stackusage.exec(line)) {
+            const source_file = matches[1];
+            const line = Number(matches[2]);
+            // ignore column matches[3]
+            const name: string = matches[4];
+            const stack_usage = Number(matches[5]);
+            const qualifier = matches[6];
 
-        let symbols: Symbol[] = [];
-
-        for (const line of lines) {
-            let matches;
-
-            if (matches = stackusage.exec(line)) {
-                const source_file = matches[1];
-                const line_number = Number(matches[2]);
-                const name = matches[4];
-                const stack_usage = Number(matches[5]);
-                const qualifier = matches[6];
-
-                symbols.push({
-                    name,
-                    stack_usage,
-                });
-
-            } else {
-                console.error("could not match su line %s", line);
-            }
-
+            symbols[name] = { name, stack_usage, source_file, line };
+        } else {
+            console.error("could not match su line %s", line);
         }
-
-        this.symbols = this.symbols.concat(symbols);
     }
+
+    return symbols;
 }
