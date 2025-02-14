@@ -1,76 +1,77 @@
 import * as vscode from 'vscode';
 import { parseMap } from './mapParser';
+import { log } from './outputChannel';
 import { parseSu } from './suParser';
 import { Symbol, SymbolArray } from './types/symbol';
-import { log } from './outputChannel';
 
 const mapGlob = "**/*.map";
 const suGlob = "**/*.su";
 
-export class SymbolStore {
+export class SymbolStore implements vscode.Disposable {
 
     private symbols: SymbolArray = {};
 
-    private buildDirUri: vscode.Uri;
+    private buildDirUri!: vscode.Uri;
 
-    private mapRelGlob: vscode.RelativePattern;
-    public mapWatcher: vscode.FileSystemWatcher | undefined;
+    private mapRelGlob!: vscode.RelativePattern;
+    public mapWatcher!: vscode.FileSystemWatcher;
 
-    private suRelGlob: vscode.RelativePattern;
-    public suWatcher: vscode.FileSystemWatcher | undefined;
+    private suRelGlob!: vscode.RelativePattern;
+    public suWatcher!: vscode.FileSystemWatcher;
 
-    constructor(buildDirUri: vscode.Uri) {
+    dispose() {
+        this.mapWatcher.dispose();
+        this.suWatcher.dispose();
+    }
+
+    async setBuildDir(buildDirUri: vscode.Uri) {
+        this.symbols = {};
         this.buildDirUri = buildDirUri;
         this.mapRelGlob = new vscode.RelativePattern(this.buildDirUri.fsPath, mapGlob);
         this.suRelGlob = new vscode.RelativePattern(this.buildDirUri.fsPath, suGlob);
-
-        this.parseAll();
+        await this.parseAll();
         this.initWatchers();
     }
 
-    public clear() {
-        this.symbols = {};
-    }
-
-    public async parseAll() {
+    async parseAll() {
         let mapFiles = await vscode.workspace.findFiles(this.mapRelGlob, null, 1);
         if (mapFiles.length > 0) {
-            this.merge(await parseMap(mapFiles[0]));
+            this.pushSymbols(await parseMap(mapFiles[0]));
         }
 
         vscode.workspace.findFiles(this.suRelGlob).then((files) => {
             files.forEach(async (uri) => {
-                this.merge(await parseSu(uri));
+                this.pushSymbols(await parseSu(uri));
             });
         });
     }
 
-    public initWatchers() {
+    initWatchers() {
         if (!this.buildDirUri) { return; }
 
-        if (this.suWatcher) { this.suWatcher.dispose(); }
-        const relSuGlob = new vscode.RelativePattern(this.buildDirUri.fsPath, suGlob);
-        this.suWatcher = vscode.workspace.createFileSystemWatcher(relSuGlob);
-
-        this.suWatcher.onDidCreate(async (uri) => { this.merge(await parseSu(uri)); });
-        this.suWatcher.onDidChange(async (uri) => { this.merge(await parseSu(uri)); });
-
         if (this.mapWatcher) { this.mapWatcher.dispose(); }
-        const relMapGlob = new vscode.RelativePattern(this.buildDirUri.fsPath, mapGlob);
-        this.mapWatcher = vscode.workspace.createFileSystemWatcher(relMapGlob);
+        this.mapWatcher = vscode.workspace.createFileSystemWatcher(this.mapRelGlob);
 
-        this.mapWatcher.onDidCreate(async (uri) => { this.merge(await parseMap(uri)); });
-        this.mapWatcher.onDidChange(async (uri) => { this.merge(await parseMap(uri)); });
+        this.mapWatcher.onDidCreate(async (uri) => { this.pushSymbols(await parseMap(uri)); });
+        this.mapWatcher.onDidChange(async (uri) => { this.pushSymbols(await parseMap(uri)); });
 
+        if (this.suWatcher) { this.suWatcher.dispose(); }
+        this.suWatcher = vscode.workspace.createFileSystemWatcher(this.suRelGlob);
+
+        this.suWatcher.onDidCreate(async (uri) => { this.pushSymbols(await parseSu(uri)); });
+        this.suWatcher.onDidChange(async (uri) => { this.pushSymbols(await parseSu(uri)); });
     }
 
-    public getByName(symbolName: string): Symbol {
+    getByName(symbolName: string): Symbol {
         return this.symbols[symbolName];
     }
 
-    public merge(symbols: SymbolArray) {
+    /*
+     * Merge symbols to symbol store, replacing existing fields
+     */
+    pushSymbols(symbols: SymbolArray) {
         let name: keyof SymbolArray;
-        for (const name in symbols) {
+        for (name in symbols) {
             this.symbols[name] = { ...this.symbols[name], ...symbols[name] };
             // log(`updated ${name}`);
         }

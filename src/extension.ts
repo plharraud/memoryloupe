@@ -1,35 +1,38 @@
 import * as vscode from 'vscode';
-import { onBuildDirSelected, selectBuildDir, setBuildDir } from './commands';
+import { BuildDir } from './buildDir';
 import { log } from './outputChannel';
 import { SymbolCodeLensProvider } from './symbolCodeLensProvider';
 import { SymbolStore } from './symbolStore';
 
 
 export function activate(context: vscode.ExtensionContext) {
-    let symbolStore;
+    const buildDir = new BuildDir();
+    const symbolStore = new SymbolStore();
+    const symbolCodeLensProvider = new SymbolCodeLensProvider();
 
-    vscode.commands.registerCommand("memoryloupe.selectBuildDir", selectBuildDir);    
+    context.subscriptions.push(vscode.commands.registerCommand("memoryloupe.selectBuildDir", () => { buildDir.selectBuildDir(); }));
 
-    onBuildDirSelected((buildDirUri) => {
+    context.subscriptions.push(vscode.languages.registerCodeLensProvider({ language: "c", scheme: "file" }, symbolCodeLensProvider));
+    context.subscriptions.push(vscode.languages.registerCodeLensProvider({ language: "cpp", scheme: "file" }, symbolCodeLensProvider));
+
+    context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor((e) => {
+        if (e && ['c', 'cpp'].includes(e.document.languageId)) {
+            symbolCodeLensProvider.refresh();
+        }
+    }));
+
+    context.subscriptions.push(buildDir);
+    context.subscriptions.push(symbolStore);
+    context.subscriptions.push(symbolCodeLensProvider);
+
+    context.subscriptions.push(buildDir.onBuildDirSelected(async function(buildDirUri) {
         log(`selected build directory: ${buildDirUri.fsPath}`);
 
-        symbolStore = new SymbolStore(buildDirUri);
+        await symbolStore.setBuildDir(buildDirUri);
+        symbolCodeLensProvider.setSymbolStore(symbolStore);
+    }));
 
-        const symbolCodeLensProvider = new SymbolCodeLensProvider(symbolStore);
-
-        vscode.window.onDidChangeActiveTextEditor((e) => {
-            if (e?.document) {
-                symbolCodeLensProvider.refresh();
-            }
-        });
-
-        context.subscriptions.push(vscode.languages.registerCodeLensProvider({ language: "c", scheme: "file" }, symbolCodeLensProvider));
-        context.subscriptions.push(vscode.languages.registerCodeLensProvider({ language: "cpp", scheme: "file" }, symbolCodeLensProvider));
-
-        symbolCodeLensProvider.refresh();
-    });
-
-    if (vscode.workspace.workspaceFolders) {
-        setBuildDir(vscode.workspace.workspaceFolders[0].uri);
+    if (vscode.workspace.workspaceFolders) { // set default build dir to project root
+        buildDir.set(vscode.workspace.workspaceFolders[0].uri);
     }
 }

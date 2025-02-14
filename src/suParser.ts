@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { readLines } from './common';
-import { SymbolArray } from './types/symbol';
 import { log } from './outputChannel';
+import { SymbolArray } from './types/symbol';
 
 const stackusage = /^(.+):(\d+):(\d+):(\S+)\t(\d+)\t(static|dynamic|bounded)$/;
 

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { SymbolStatus } from './types/symbol';
 import { SymbolStore } from './symbolStore';
+import { SymbolStatus } from './types/symbol';
 
 async function getDocumentSymbols(documentUri: vscode.Uri): Promise<vscode.SymbolInformation[]> {
     return await vscode.commands.executeCommand(
@@ -9,34 +9,36 @@ async function getDocumentSymbols(documentUri: vscode.Uri): Promise<vscode.Symbo
     );
 }
 
-export class SymbolCodeLensProvider implements vscode.CodeLensProvider {
+export class SymbolCodeLensProvider implements vscode.CodeLensProvider, vscode.Disposable {
     private _onDidChangeCodeLenses: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
     readonly onDidChangeCodeLenses: vscode.Event<void> = this._onDidChangeCodeLenses.event;
 
-    private symbolStore: SymbolStore;
+    private symbolStore: SymbolStore | undefined;
 
-    constructor(symbolStore: SymbolStore) {
+    dispose() {
+        this._onDidChangeCodeLenses.dispose();
+    }
+
+    setSymbolStore(symbolStore: SymbolStore) {
         this.symbolStore = symbolStore;
+        this.refresh();
     }
 
     async provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.CodeLens[]> {
         console.log("providing codelenses for %s", document.fileName);
 
-        const documentSymbols = await getDocumentSymbols(document.uri);
-        if (!documentSymbols) { return []; }
-
         const lenses: vscode.CodeLens[] = [];
+        const documentSymbols = await getDocumentSymbols(document.uri);
 
         documentSymbols.forEach((ds) => {
             const symbol_name = ds.name.split("(")[0];
-            const symbol = this.symbolStore.getByName(symbol_name);
+            const symbol = this.symbolStore?.getByName(symbol_name);
 
             if (symbol) {
                 let bits = [];
                 bits.push(`size: ${symbol.size}B`);
 
-
-                if (symbol.stack_usage) {
+                if (symbol.stack_usage !== undefined) {
                     bits.push(` stack: ${symbol.stack_usage}B`);
                 }
 
