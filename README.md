@@ -10,6 +10,7 @@ It parses gcc generated files produced when compiling and linking executable wit
 - `-fstack-usage` outputs `.su` files
 
 ## Features
+
 codelenses provide symbol info such as
 
 - symbol code size
@@ -26,7 +27,13 @@ Open a C file, the codelenses should appear next to the symbols.
 
 The extension activates, finds and parses `.map` and `.su` files witin the current workspace.
 
-Run `Memoryloupe: Select build folder` to choose the location of the files to be parsed, if you have multiple build dirs.
+### Commands
+
+- `memoryloupe: Select build directory` choose the location of the files to be parsed, if you have multiple build dirs.
+
+### Settings
+
+* `memoryloupe.buildDir`: Enable/disable this extension.
 
 ## Build
 
@@ -36,21 +43,13 @@ npm install
 npm run vsix
 ```
 
-<!-- 
-## Extension Settings
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
- -->
-
 ## Roadmap
 
 - codelens format configuration (templating) in configuration
-- build dir saved in configuration
 - use quickpicks instead of filepicker for selecting build dir
-- error handling
+- error handling and logging
 - tests
+- extension icon
 
 ## Known Issues
 
@@ -60,9 +59,14 @@ This extension contributes the following settings:
 
 ## Release Notes
 
+### 1.2.0
+
+- fixed `Select build directory` command, there is now only one codelens
+- added `buildDir` configuration, updated with `Select build directory`
+
 ### 1.1.0
 
-- added `Select build folder` command
+- added `Select build directory` command
 
 ### 1.0.0
 

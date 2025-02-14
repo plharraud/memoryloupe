@@ -12,7 +12,7 @@
   ],
   "preview": true,
   "license": "SEE LICENSE IN LICENSE",
-  "homepage": "https://github.com/plharraud/memoryloupe/blob/dev/README.md",
+  "homepage": "https://github.com/plharraud/memoryloupe",
   "repository": {
     "type": "git",
     "url": "https://github.com/plharraud/memoryloupe"
@@ -24,7 +24,7 @@
     "workspace"
   ],
   "pricing": "Free",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "engines": {
     "vscode": "^1.86.0"
@@ -42,9 +42,17 @@
     "commands": [
       {
         "command": "memoryloupe.selectBuildDir",
-        "title": "Memoryloupe: Select build directory"
+        "title": "memoryloupe: Select build directory"
       }
-    ]
+    ],
+    "configuration":{
+      "properties": {
+        "memoryloupe.buildDir": {
+          "type":"string",
+          "description": "directory to look for .map and .su files"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

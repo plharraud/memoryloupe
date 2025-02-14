@@ -1,15 +1,16 @@
 import * as vscode from 'vscode';
+import { extConfig } from './config';
 
 export class BuildDir implements vscode.Disposable {
-    private _onBuildDirSelected: vscode.EventEmitter<vscode.Uri> = new vscode.EventEmitter<vscode.Uri>();
-    readonly onBuildDirSelected: vscode.Event<vscode.Uri> = this._onBuildDirSelected.event;
+    private _onDidChangeBuildDir: vscode.EventEmitter<vscode.Uri> = new vscode.EventEmitter<vscode.Uri>();
+    readonly onDidChangeBuildDir: vscode.Event<vscode.Uri> = this._onDidChangeBuildDir.event;
 
     dispose() {
-        this._onBuildDirSelected.dispose();
+        this._onDidChangeBuildDir.dispose();
     }
 
     set(buildDirUri: vscode.Uri) {
-        this._onBuildDirSelected.fire(buildDirUri);
+        this._onDidChangeBuildDir.fire(buildDirUri);
     }
 
     async selectBuildDir(): Promise<boolean> {
@@ -17,12 +18,13 @@ export class BuildDir implements vscode.Disposable {
             canSelectFiles: false,
             canSelectFolders: true,
             canSelectMany: false,
-            title: "build directory to search for .map and .su files",
+            title: "directory to look for .map and .su files",
             defaultUri: vscode.workspace.workspaceFolders?.at(0)?.uri
         });
 
         if (!uris) { return false; }
-        this.set(uris[0]);
+        extConfig.setBuildDir(uris[0]);
+        // this.set(uris[0]); // setBuildDir triggers event watched in activate, uncommenting would update twice
         return true;
     }
 }

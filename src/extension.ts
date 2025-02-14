@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import { BuildDir } from './buildDir';
+import { extConfig } from './config';
 import { log } from './outputChannel';
 import { SymbolCodeLensProvider } from './symbolCodeLensProvider';
 import { SymbolStore } from './symbolStore';
-
 
 export function activate(context: vscode.ExtensionContext) {
     const buildDir = new BuildDir();
@@ -11,6 +11,15 @@ export function activate(context: vscode.ExtensionContext) {
     const symbolCodeLensProvider = new SymbolCodeLensProvider();
 
     context.subscriptions.push(vscode.commands.registerCommand("memoryloupe.selectBuildDir", () => { buildDir.selectBuildDir(); }));
+
+    context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((e) => {
+        if (e.affectsConfiguration("memoryloupe.buildDir")) {
+            let buildDirUri = extConfig.getBuildDir();
+            if (buildDirUri) {
+                buildDir.set(buildDirUri);
+            }
+        }
+    }));
 
     context.subscriptions.push(vscode.languages.registerCodeLensProvider({ language: "c", scheme: "file" }, symbolCodeLensProvider));
     context.subscriptions.push(vscode.languages.registerCodeLensProvider({ language: "cpp", scheme: "file" }, symbolCodeLensProvider));
@@ -25,14 +34,19 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(symbolStore);
     context.subscriptions.push(symbolCodeLensProvider);
 
-    context.subscriptions.push(buildDir.onBuildDirSelected(async function(buildDirUri) {
-        log(`selected build directory: ${buildDirUri.fsPath}`);
+    context.subscriptions.push(buildDir.onDidChangeBuildDir(async function (buildDirUri) {
+        log(`build directory: ${buildDirUri.fsPath}`);
 
         await symbolStore.setBuildDir(buildDirUri);
         symbolCodeLensProvider.setSymbolStore(symbolStore);
     }));
 
-    if (vscode.workspace.workspaceFolders) { // set default build dir to project root
-        buildDir.set(vscode.workspace.workspaceFolders[0].uri);
+    if (vscode.workspace.workspaceFolders) {
+        const buildDirUri = extConfig.getBuildDir();
+        if (buildDirUri) { // use saved build dir
+            buildDir.set(buildDirUri);
+        } else { // or set default to project root
+            buildDir.set(vscode.workspace.workspaceFolders[0].uri);
+        }
     }
 }
