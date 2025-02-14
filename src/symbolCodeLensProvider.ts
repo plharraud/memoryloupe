@@ -36,11 +36,9 @@ export class SymbolCodeLensProvider implements vscode.CodeLensProvider, vscode.D
 
             if (symbol) {
                 let bits = [];
-                bits.push(`size: ${symbol.size}B`);
+                bits.push(`size: ${symbol.size ?? 0}B`);
 
-                if (symbol.stack_usage !== undefined) {
-                    bits.push(` stack: ${symbol.stack_usage}B`);
-                }
+                bits.push(` stack: ${symbol.stack_usage ?? 0}B`);
 
                 if (symbol.address) {
                     bits.push(`0x${symbol.address.toString(16)}`);
