@@ -6,7 +6,7 @@ import { SymbolArray } from './types/symbol';
 const stackusage = /^(.+):(\d+):(\d+):(\S+)\t(\d+)\t(static|dynamic|bounded)$/;
 
 export async function parseSu(suUri: vscode.Uri) {
-    log(`parsing ${suUri.fsPath}`);
+    // log(`parsing ${suUri.fsPath}`);
 
     const lines = await readLines(suUri);
 

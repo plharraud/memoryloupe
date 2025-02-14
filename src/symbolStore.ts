@@ -75,6 +75,6 @@ export class SymbolStore implements vscode.Disposable {
             this.symbols[name] = { ...this.symbols[name], ...symbols[name] };
             // log(`updated ${name}`);
         }
-        log(`updated ${Object.keys(symbols).length} symbols`);
+        // log(`updated ${Object.keys(symbols).length} symbols`);
     }
 }

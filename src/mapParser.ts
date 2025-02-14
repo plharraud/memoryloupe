@@ -10,7 +10,7 @@ const object_loads = /^(LOAD|START|END)\s/;
 const output = /^OUTPUT/;
 
 export async function parseMap(mapUri: vscode.Uri): Promise<SymbolArray> {
-    log(`parsing ${mapUri.fsPath}`);
+    // log(`parsing ${mapUri.fsPath}`);
 
     const lines = await readLines(mapUri);
 
