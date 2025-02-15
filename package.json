@@ -43,18 +43,27 @@
       {
         "command": "memoryloupe.selectBuildDir",
         "title": "memoryloupe: Select build directory"
+      },
+      {
+        "command": "memoryloupe.toggleCodeLenses",
+        "title": "memoryloupe: Toggle codelenses"
       }
     ],
-    "configuration":{
+    "configuration": {
       "properties": {
         "memoryloupe.buildDir": {
-          "type":"string",
+          "type": "string",
           "description": "Directory to look for .map and .su files"
         },
         "memoryloupe.lenseFormat": {
-          "type":"string",
+          "type": "string",
           "default": "size: %size, stack: %stack, %address %status",
           "description": "Custom codelense format string, available values: %name, %section, %address, %size, %status, %stack"
+        },
+        "memoryloupe.codeLensesEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show codelenses next to symbols in source files"
         }
       }
     }

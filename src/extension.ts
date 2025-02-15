@@ -11,6 +11,9 @@ export function activate(context: vscode.ExtensionContext) {
     const symbolCodeLensProvider = new SymbolCodeLensProvider();
 
     context.subscriptions.push(vscode.commands.registerCommand("memoryloupe.selectBuildDir", () => { buildDir.selectBuildDir(); }));
+    context.subscriptions.push(vscode.commands.registerCommand("memoryloupe.toggleCodeLenses", () => {
+        extConfig.setCodeLensesEnabled(!symbolCodeLensProvider.enabled); // update config, then config watcher updates provider
+    }));
 
     context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((e) => {
         if (e.affectsConfiguration("memoryloupe.buildDir")) {
@@ -18,6 +21,10 @@ export function activate(context: vscode.ExtensionContext) {
             if (buildDirUri) {
                 buildDir.set(buildDirUri);
             }
+        }
+        if (e.affectsConfiguration("memoryloupe.codeLensesEnabled")) {
+            const enabled = extConfig.getCodeLensesEnabled();
+            symbolCodeLensProvider.setEnabled(enabled);
         }
     }));
 

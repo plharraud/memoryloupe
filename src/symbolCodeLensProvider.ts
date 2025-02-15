@@ -23,6 +23,15 @@ export class SymbolCodeLensProvider implements vscode.CodeLensProvider, vscode.D
     readonly onDidChangeCodeLenses: vscode.Event<void> = this._onDidChangeCodeLenses.event;
 
     private symbolStore: SymbolStore | undefined;
+    public enabled: boolean;
+
+    constructor() {
+        this.enabled = extConfig.getCodeLensesEnabled();
+    }
+
+    setEnabled(enabled: boolean) {
+        this.enabled = enabled;
+    }
 
     dispose() {
         this._onDidChangeCodeLenses.dispose();
@@ -34,6 +43,7 @@ export class SymbolCodeLensProvider implements vscode.CodeLensProvider, vscode.D
     }
 
     async provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.CodeLens[]> {
+        if (!this.enabled) { return []; }
         console.log("providing codelenses for %s", document.fileName);
 
         const lenses: vscode.CodeLens[] = [];

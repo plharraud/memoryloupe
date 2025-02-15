@@ -27,6 +27,15 @@ export class ExtensionConfig {
         return this.getConfig().inspect<string>("lenseFormat")?.defaultValue ?? "error, please define memoryloupe.lenseFormat config";
     }
 
+    getCodeLensesEnabled(): boolean {
+        const enabled = this.getConfig().get<boolean>("codeLensesEnabled");
+        return enabled ?? true;
+    }
+
+    setCodeLensesEnabled(enabled: boolean) {
+        this.getConfig().update("codeLensesEnabled", enabled, null);
+    }
+
 }
 
 export const extConfig = new ExtensionConfig();

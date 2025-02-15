@@ -29,12 +29,14 @@ The extension activates, finds and parses `.map` and `.su` files witin the curre
 
 ### Commands
 
-- `memoryloupe: Select build directory` choose the location of the files to be parsed, if you have multiple build dirs.
+- `memoryloupe: Select build directory`: Set the location where the files should be searched.
+- `memoryloupe: Toggle codelenses`: Enable/disable codelenses.
 
 ### Settings
 
-- `memoryloupe.buildDir`: Directory to look for .map and .su files, also set by `Select build directory` command
-- `memoryloupe.lenseFormat`: Custom codelense format string, available values: %name, %section, %address, %size, %status, %stack
+- `memoryloupe.buildDir`: Directory to look for .map and .su files, also set by `Select build directory` command.
+- `memoryloupe.lenseFormat`: Custom codelense format string, available values: %name, %section, %address, %size, %status, %stack.
+- `memoryloupe.codeLensesEnabled`: Show codelenses next to symbols in source files
 
 ## Build
 
@@ -46,6 +48,7 @@ npm run vsix
 
 ## Roadmap
 
+- alert if multiple .map found > button select or disable
 - tree view
 - use quickpicks instead of filepicker for selecting build dir
 - error handling and logging
