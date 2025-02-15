@@ -1,12 +1,21 @@
 import * as vscode from 'vscode';
 import { SymbolStore } from './symbolStore';
 import { SymbolStatus } from './types/symbol';
+import { extConfig } from './config';
 
 async function getDocumentSymbols(documentUri: vscode.Uri): Promise<vscode.SymbolInformation[]> {
     return await vscode.commands.executeCommand(
         "vscode.executeDocumentSymbolProvider",
         documentUri,
     );
+}
+
+const template_regex = /%(\w+)/g;
+
+function formatLense(lenseFormat: string, values: { [name: string]: string }) {
+    return lenseFormat.replace(template_regex, (_, k) => {
+        return k in values ? values[k] : _;
+    });
 }
 
 export class SymbolCodeLensProvider implements vscode.CodeLensProvider, vscode.Disposable {
@@ -30,26 +39,23 @@ export class SymbolCodeLensProvider implements vscode.CodeLensProvider, vscode.D
         const lenses: vscode.CodeLens[] = [];
         const documentSymbols = await getDocumentSymbols(document.uri);
 
+        const lenseFormat = extConfig.getLenseFormat();
+
         documentSymbols.forEach((ds) => {
             const symbol_name = ds.name.split("(")[0];
             const symbol = this.symbolStore?.getByName(symbol_name);
 
             if (symbol) {
-                let bits = [];
-                bits.push(`size: ${symbol.size ?? 0}B`);
+                const title = formatLense(lenseFormat, {
+                    "name": symbol.name,
+                    "section": symbol.section ?? '',
+                    "address": symbol.address ? `0x${symbol.address.toString(16)}` : '',
+                    "size": `${symbol.size ?? 0}B`,
+                    "status": symbol.status === SymbolStatus.discarded ? 'discarded' : '',
+                    "stack": `${symbol.stack_usage ?? 0}B`,
+                });
 
-                bits.push(` stack: ${symbol.stack_usage ?? 0}B`);
-
-                if (symbol.address) {
-                    bits.push(`0x${symbol.address.toString(16)}`);
-                } else if (symbol.status === SymbolStatus.discarded) {
-                    bits.push("discarded");
-                }
-
-                lenses.push(new vscode.CodeLens(
-                    ds.location.range,
-                    { title: bits.join(", "), command: "" }
-                ));
+                lenses.push(new vscode.CodeLens(ds.location.range, { title, command: "" }));
             }
         });
 

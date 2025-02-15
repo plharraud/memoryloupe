@@ -49,7 +49,12 @@
       "properties": {
         "memoryloupe.buildDir": {
           "type":"string",
-          "description": "directory to look for .map and .su files"
+          "description": "Directory to look for .map and .su files"
+        },
+        "memoryloupe.lenseFormat": {
+          "type":"string",
+          "default": "size: %size, stack: %stack, %address %status",
+          "description": "Custom codelense format string, available values: %name, %section, %address, %size, %status, %stack"
         }
       }
     }

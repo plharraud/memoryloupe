@@ -19,6 +19,14 @@ export class ExtensionConfig {
         return undefined;
     }
 
+    getLenseFormat(): string {
+        const lenseFormat = this.getConfig().get<string>("lenseFormat");
+        if (lenseFormat) {
+            return lenseFormat;
+        }
+        return this.getConfig().inspect<string>("lenseFormat")?.defaultValue ?? "error, please define memoryloupe.lenseFormat config";
+    }
+
 }
 
 export const extConfig = new ExtensionConfig();

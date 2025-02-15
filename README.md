@@ -33,7 +33,8 @@ The extension activates, finds and parses `.map` and `.su` files witin the curre
 
 ### Settings
 
-* `memoryloupe.buildDir`: Enable/disable this extension.
+- `memoryloupe.buildDir`: Directory to look for .map and .su files, also set by `Select build directory` command
+- `memoryloupe.lenseFormat`: Custom codelense format string, available values: %name, %section, %address, %size, %status, %stack
 
 ## Build
 
@@ -45,7 +46,7 @@ npm run vsix
 
 ## Roadmap
 
-- codelens format configuration (templating) in configuration
+- tree view
 - use quickpicks instead of filepicker for selecting build dir
 - error handling and logging
 - tests
@@ -55,6 +56,7 @@ npm run vsix
 
 - duplicate symbols, not filtering by file: symbol information can be mismatched if there are multiple symbols with the same name, although this should not be possible
 - not tested on c++ project, although the extension activates for cpp files, it could work
+- only tested with bare-metal arm-none-eabi projects
 - only support utf-8 file encoding
 
 ## Release Notes
@@ -63,6 +65,7 @@ npm run vsix
 
 - fixed `Select build directory` command, there is now only one codelens
 - added `buildDir` configuration, updated with `Select build directory`
+- added `lenseFormat` configuration, to customize lense text
 
 ### 1.1.0
 
