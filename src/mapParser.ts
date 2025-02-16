@@ -23,7 +23,7 @@ export async function parseMap(mapUri: vscode.Uri): Promise<SymbolArray> {
         let matches;
 
         if (state === "start") {
-            if (line === "Discarded input sections") {
+            if (line === "Discarded input sections" || line === "There are no discarded input sections") {
                 state = "discarded";
             } else { // dont care about archive members
                 continue;
