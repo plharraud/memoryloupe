@@ -1,15 +1,12 @@
 # memoryloupe
 
-memoryloupe provides codelenses about gcc compiled executable symbol size and stack usage.
-
-It is used to provide insight  next to the actual code.
+memoryloupe provides in-editor code size insights: codelenses about executable symbol size and stack usage.
 
 It parses gcc generated files produced when compiling and linking executable with the following options:
 
-- `-Wl,-Map=%.map` outputs `.map` file
-- `-fstack-usage` outputs `.su` files
-- `-ffunction-sections` and `-fdata-sections` separates symbols in their own section
-    which enables garbage collection (using `-Wl,--gc-sections`), and produces usable data in .map file
+- `-Wl,-Map=%.map` outputs `.map` file.
+- `-fstack-usage` outputs `.su` files.
+- `-ffunction-sections` and `-fdata-sections` separates symbols in their own section, enables garbage collection (using `-Wl,--gc-sections`), and produces usable data in .map file.
 
 ## Features
 
@@ -21,7 +18,7 @@ codelenses provide symbol info such as
 
 ## Requirements
 
-Requires an extension that provides symbol information (Outline panel in the Explorer tab): [C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) or [clangd](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd)
+Requires an extension that provides symbol information (`Outline` panel in the `Explorer` tab): [C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) or [clangd](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd)
 
 ## Usage
 
@@ -71,6 +68,7 @@ npm run vsix
 
 - added `codeLensesEnabled` configuration
 - added `Toggle codelenses` command
+- support .map files with no discarded symbols
 
 ### 1.2.0
 

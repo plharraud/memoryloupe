@@ -1,17 +1,17 @@
 {
   "name": "memoryloupe",
   "publisher": "plharraud",
-  "displayName": "memoryloupe - gcc mapfile codelenses",
-  "description": "codelenses about gcc compiled executable symbol size and stack usage",
+  "displayName": "memoryloupe - in-editor code size insights",
+  "description": "provide codelenses about compiled executable symbol size and stack usage",
   "keywords": [
     "symbol",
     "size",
     "stack",
     "usage",
-    "mapfile"
+    "map",
+    "gcc"
   ],
-  "preview": true,
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "MIT",
   "homepage": "https://github.com/plharraud/memoryloupe",
   "repository": {
     "type": "git",
@@ -24,7 +24,7 @@
     "workspace"
   ],
   "pricing": "Free",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "private": true,
   "engines": {
     "vscode": "^1.86.0"
