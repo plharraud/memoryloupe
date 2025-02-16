@@ -8,6 +8,8 @@ It parses gcc generated files produced when compiling and linking executable wit
 
 - `-Wl,-Map=%.map` outputs `.map` file
 - `-fstack-usage` outputs `.su` files
+- `-ffunction-sections` and `-fdata-sections` separates symbols in their own section
+    which enables garbage collection (using `-Wl,--gc-sections`), and produces usable data in .map file
 
 ## Features
 
@@ -54,6 +56,7 @@ npm run vsix
 - error handling and logging
 - tests
 - extension icon
+- ci/cd https://github.com/HaaLeo/publish-vscode-extension
 
 ## Known Issues
 
@@ -63,6 +66,11 @@ npm run vsix
 - only support utf-8 file encoding
 
 ## Release Notes
+
+### 1.3.0
+
+- added `codeLensesEnabled` configuration
+- added `Toggle codelenses` command
 
 ### 1.2.0
 
@@ -77,3 +85,17 @@ npm run vsix
 ### 1.0.0
 
 - Initial release
+
+## Other tools
+
+### vscode extensions
+- https://github.com/XibrenX/gcc-stack-usage
+- https://github.com/nachstedt/vscode-stack-usage
+
+### cli tools
+- https://github.com/jedrzejboczar/elf-size-analyze
+- https://github.com/PromyLOPh/linkermapviz
+- https://os.mbed.com/docs/mbed-os/v6.16/debug-test/memap.html
+### gui tools
+- https://www.sikorskiy.net/info/prj/amap/index.html
+- https://github.com/govind-mukundan/MapViewer?tab=readme-ov-file
