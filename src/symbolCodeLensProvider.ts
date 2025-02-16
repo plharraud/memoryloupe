@@ -60,9 +60,9 @@ export class SymbolCodeLensProvider implements vscode.CodeLensProvider, vscode.D
                     "name": symbol.name,
                     "section": symbol.section ?? '',
                     "address": symbol.address ? `0x${symbol.address.toString(16)}` : '',
-                    "size": `${symbol.size ?? 0}B`,
+                    "size": `${symbol.size ?? 'unknown'}B`,
                     "status": symbol.status === SymbolStatus.discarded ? 'discarded' : '',
-                    "stack": `${symbol.stack_usage ?? 0}B`,
+                    "stack": `${symbol.stack_usage ?? 'unkown'}B`,
                 });
 
                 lenses.push(new vscode.CodeLens(ds.location.range, { title, command: "" }));
