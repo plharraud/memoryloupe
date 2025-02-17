@@ -10,11 +10,13 @@ async function getDocumentSymbols(documentUri: vscode.Uri): Promise<vscode.Symbo
     );
 }
 
-const template_regex = /%(\w+)/g;
+const template_regex = /\$(?:\[([^\{\}]+)\])?\{(\w+)\}/g; // matches $[prefix]{key} or ${key}
 
-function formatLense(lenseFormat: string, values: { [name: string]: string }) {
-    return lenseFormat.replace(template_regex, (_, k) => {
-        return k in values ? values[k] : _;
+function formatLense(lenseFormat: string, values: { [name: string]: string | undefined }) {
+    return lenseFormat.replace(template_regex, (_, prefix, key) => {
+        return key in values && values[key]
+            ? (prefix ?? '') + values[key]
+            : '';
     });
 }
 
@@ -58,11 +60,11 @@ export class SymbolCodeLensProvider implements vscode.CodeLensProvider, vscode.D
             if (symbol) {
                 const title = formatLense(lenseFormat, {
                     "name": symbol.name,
-                    "section": symbol.section ?? '',
-                    "address": symbol.address ? `0x${symbol.address.toString(16)}` : '',
-                    "size": `${symbol.size ?? 'unknown'}B`,
-                    "status": symbol.status === SymbolStatus.discarded ? 'discarded' : '',
-                    "stack": `${symbol.stack_usage ?? 'unkown'}B`,
+                    "section": symbol.section,
+                    "address": symbol.address ? `0x${symbol.address.toString(16)}` : undefined,
+                    "size": symbol.size ? `${symbol.size}B` : undefined,
+                    "status": symbol.status === SymbolStatus.discarded ? 'discarded' : undefined,
+                    "stack": symbol.stack_usage ? `${symbol.stack_usage}B` : undefined,
                 });
 
                 lenses.push(new vscode.CodeLens(ds.location.range, { title, command: "" }));
