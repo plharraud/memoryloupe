@@ -10,17 +10,19 @@ It parses gcc generated files produced when compiling and linking executable wit
 - `-fstack-usage` outputs `.su` files.
 - `-ffunction-sections` and `-fdata-sections` separates symbols in their own section, enables garbage collection (using `-Wl,--gc-sections`), and produces usable data in .map file.
 
+MemoryLoupe is available on the [Open VSX Registry](https://open-vsx.org/extension/plharraud/memoryloupe), [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=plharraud.memoryloupe) and in [Github releases](https://github.com/plharraud/memoryloupe/releases/latest).
+
 ## Features
 
 codelenses provide symbol info such as
 
-- symbol code size
-- discarded or used status
-- function stack usage
+- Symbol code size, address and section
+- Whether the symbol is discarded or not
+- Function stack usage
 
 ## Requirements
 
-Requires an extension that provides symbol information (`Outline` panel in the `Explorer` tab): [C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) or [clangd](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd)
+Requires an extension that provides symbol information (`Outline` panel in the `Explorer` tab): [C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) or [clangd](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd).
 
 ## Usage
 
@@ -35,13 +37,13 @@ The extension activates, finds and parses `.map` and `.su` files witin the curre
 
 ### Settings
 
-- `memoryloupe.codeLensesEnabled`: Show codelenses next to symbols in source files
+- `memoryloupe.codeLensesEnabled`: Show codelenses next to symbols in editor.
 - `memoryloupe.buildDir`: Directory to look for .map and .su files, also set by `Select build directory` command.
-- `memoryloupe.lenseFormat`: Custom codelense format string. Specify optional prefix with $[prefix]{value}.
+- `memoryloupe.lenseFormat`: Custom codelense format string. Specify optional prefix with `$[prefix]{value}`.
 
 ## Build
 
-build the extension `.vsix` package
+Build the extension `.vsix` package:
 ```shell
 npm install
 npm run vsix
