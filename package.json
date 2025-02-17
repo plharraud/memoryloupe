@@ -1,8 +1,8 @@
 {
   "name": "memoryloupe",
   "publisher": "plharraud",
-  "displayName": "memoryloupe - in-editor code size insights",
-  "description": "provide codelenses about compiled executable symbol size and stack usage",
+  "displayName": "MemoryLoupe - in-editor code size insights",
+  "description": "codelenses about compiled executable symbol size and stack usage",
   "keywords": [
     "symbol",
     "size",
@@ -24,7 +24,7 @@
     "workspace"
   ],
   "pricing": "Free",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "private": true,
   "engines": {
     "vscode": "^1.86.0"
@@ -57,8 +57,8 @@
         },
         "memoryloupe.lenseFormat": {
           "type": "string",
-          "default": "size: %size, stack: %stack, %address %status",
-          "description": "Custom codelense format string, available values: %name, %section, %address, %size, %status, %stack"
+          "default": "${section} $[size: ]{size} $[stack: ]{stack} ${address} ${status}",
+          "description": "Custom codelense format string. Specify optional prefix with $[prefix]{value}\nAvailable values: name, section, address, size, status, stack"
         },
         "memoryloupe.codeLensesEnabled": {
           "type": "boolean",

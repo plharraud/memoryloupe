@@ -1,6 +1,8 @@
-# memoryloupe
+# MemoryLoupe
 
-memoryloupe provides in-editor code size insights: codelenses about executable symbol size and stack usage.
+MemoryLoupe provides in-editor code size insights: codelenses about executable symbol size and stack usage.
+
+![Sample code with symbol codelenses](https://raw.githubusercontent.com/plharraud/memoryloupe/dev/assets/symbol_codelenses.png)
 
 It parses gcc generated files produced when compiling and linking executable with the following options:
 
@@ -33,9 +35,9 @@ The extension activates, finds and parses `.map` and `.su` files witin the curre
 
 ### Settings
 
-- `memoryloupe.buildDir`: Directory to look for .map and .su files, also set by `Select build directory` command.
-- `memoryloupe.lenseFormat`: Custom codelense format string, available values: %name, %section, %address, %size, %status, %stack.
 - `memoryloupe.codeLensesEnabled`: Show codelenses next to symbols in source files
+- `memoryloupe.buildDir`: Directory to look for .map and .su files, also set by `Select build directory` command.
+- `memoryloupe.lenseFormat`: Custom codelense format string. Specify optional prefix with $[prefix]{value}.
 
 ## Build
 
@@ -45,7 +47,7 @@ npm install
 npm run vsix
 ```
 
-## Roadmap
+## Todo
 
 - alert if multiple .map found > button select or disable
 - tree view
@@ -53,7 +55,6 @@ npm run vsix
 - error handling and logging
 - tests
 - extension icon
-- ci/cd https://github.com/HaaLeo/publish-vscode-extension
 
 ## Known Issues
 
@@ -61,28 +62,6 @@ npm run vsix
 - not tested on c++ project, although the extension activates for cpp files, it could work
 - only tested with bare-metal arm-none-eabi projects
 - only support utf-8 file encoding
-
-## Release Notes
-
-### 1.3.0
-
-- added `codeLensesEnabled` configuration
-- added `Toggle codelenses` command
-- support .map files with no discarded symbols
-
-### 1.2.0
-
-- fixed `Select build directory` command, there is now only one codelens
-- added `buildDir` configuration, updated with `Select build directory`
-- added `lenseFormat` configuration, to customize lense text
-
-### 1.1.0
-
-- added `Select build directory` command
-
-### 1.0.0
-
-- Initial release
 
 ## Other tools
 
@@ -94,6 +73,7 @@ npm run vsix
 - https://github.com/jedrzejboczar/elf-size-analyze
 - https://github.com/PromyLOPh/linkermapviz
 - https://os.mbed.com/docs/mbed-os/v6.16/debug-test/memap.html
+
 ### gui tools
 - https://www.sikorskiy.net/info/prj/amap/index.html
-- https://github.com/govind-mukundan/MapViewer?tab=readme-ov-file
+- https://github.com/govind-mukundan/MapViewer
