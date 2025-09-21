@@ -42,7 +42,7 @@ The extension activates, finds and parses `.map` and `.su` files witin the curre
 - `memoryloupe.lenseFormat`: Custom codelense format string. Specify optional prefix with `$[prefix]{value}`.
 
 ## Build
-- Get [NodeJS 22](https://nodejs.org/en/download/current)
+- Install vscode current node version (sept 25: node 22) [NodeJS](https://nodejs.org/en/download/current)
 - Build the extension `.vsix` package:
 ```shell
 npm install

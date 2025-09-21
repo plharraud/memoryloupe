@@ -27,7 +27,7 @@
   "version": "1.4.0",
   "private": true,
   "engines": {
-    "vscode": "^1.86.0"
+    "vscode": "^1.97.0"
   },
   "categories": [
     "Visualization",
@@ -157,19 +157,21 @@
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
     "test": "vscode-test",
-    "vsix": "npx vsce package"
+    "vsix": "npx vsce package",
+    "ncu": "npx npm-check-updates"
   },
   "devDependencies": {
+    "@tsconfig/node22": "^22.0.2",
     "@types/mocha": "^10.0.10",
     "@types/node": "24.x",
-    "@types/vscode": "^1.86.0",
-    "@typescript-eslint/eslint-plugin": "^8.43.0",
-    "@typescript-eslint/parser": "^8.43.0",
+    "@types/vscode": "^1.97.0",
+    "@typescript-eslint/eslint-plugin": "^8.44.0",
+    "@typescript-eslint/parser": "^8.44.0",
     "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.6.0",
-    "esbuild": "^0.25.9",
-    "eslint": "^9.35.0",
+    "esbuild": "^0.25.10",
+    "eslint": "^9.36.0",
     "npm-run-all": "^4.1.5",
     "typescript": "^5.9.2"
   }
