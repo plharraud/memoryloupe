@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { readLines } from './common';
 import { log } from './outputChannel';
-import { SymbolArray } from './types/symbol';
+import { SymbolSet } from './types/symbol';
 
 const stackusage = /^(.+):(\d+):(\d+):(\S+)\t(\d+)\t(static|dynamic|bounded)$/;
 
@@ -10,7 +10,7 @@ export async function parseSu(suUri: vscode.Uri) {
 
     const lines = await readLines(suUri);
 
-    let symbols: SymbolArray = {};
+    let symbols: SymbolSet = {};
 
     for (const line of lines) {
         let matches;
@@ -23,7 +23,7 @@ export async function parseSu(suUri: vscode.Uri) {
             const stack_usage = Number(matches[5]);
             const qualifier = matches[6];
 
-            symbols[name] = { name, stack_usage, source_file, line };
+            symbols[name] = { type: "symbol", name, stack_usage, source_file, line };
         } else {
             console.error("could not match su line %s", line);
         }

@@ -10,7 +10,7 @@ It parses gcc generated files produced when compiling and linking executable wit
 - `-fstack-usage` outputs `.su` files.
 - `-ffunction-sections` and `-fdata-sections` separates symbols in their own section, enables garbage collection (using `-Wl,--gc-sections`), and produces usable data in .map file.
 
-MemoryLoupe is available on the [Open VSX Registry](https://open-vsx.org/extension/plharraud/memoryloupe), [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=plharraud.memoryloupe) and in [Github releases](https://github.com/plharraud/memoryloupe/releases/latest).
+MemoryLoupe is available on the [Open VSX Registry](https://open-vsx.org/extension/plharraud/memoryloupe), [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=plharraud.memoryloupe) and on [Github](https://github.com/plharraud/memoryloupe/releases/latest).
 
 ## Features
 
@@ -42,8 +42,8 @@ The extension activates, finds and parses `.map` and `.su` files witin the curre
 - `memoryloupe.lenseFormat`: Custom codelense format string. Specify optional prefix with `$[prefix]{value}`.
 
 ## Build
-
-Build the extension `.vsix` package:
+- Get [NodeJS 22](https://nodejs.org/en/download/current)
+- Build the extension `.vsix` package:
 ```shell
 npm install
 npm run vsix
@@ -52,18 +52,32 @@ npm run vsix
 ## Todo
 
 - alert if multiple .map found > button select or disable
-- tree view
-- use quickpicks instead of filepicker for selecting build dir
-- error handling and logging
+- tree view 
+    - actual hierarchy (add type to SymbolNode? dir file or symbol)
+    - by section then by file or flat
+    - by file then by section or flat
+    - or filter sections or multiple treeviews
+    - sort by stack usage or by code size
+    - toggle discarded or apply opacity (dont sum if discarded)
+    - branches are dirs or source files, resolve actual path relative to workspace
+    - group system symbols in one branch
+    - refresh button
+    - see in mapfile button
+    - %age of discarded per section, but it has to be robust (detect inlined etc.)
+- use nm and objdump to get more info
 - tests
+- use quickpicks instead of filepicker for selecting build dir
+- error handling and **logging**
 - extension icon
+- l10n
+
+# Limitations
+- Only supports utf-8 file encoding
 
 ## Known Issues
-
 - duplicate symbols, not filtering by file: symbol information can be mismatched if there are multiple symbols with the same name, although this should not be possible
 - not tested on c++ project, although the extension activates for cpp files, it could work
 - only tested with bare-metal arm-none-eabi projects
-- only support utf-8 file encoding
 
 ## Other tools
 

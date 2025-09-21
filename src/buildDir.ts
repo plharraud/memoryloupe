@@ -10,6 +10,7 @@ export class BuildDir implements vscode.Disposable {
     }
 
     set(buildDirUri: vscode.Uri) {
+        extConfig.setBuildDir(buildDirUri);
         this._onDidChangeBuildDir.fire(buildDirUri);
     }
 

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 1.4.0
+- Add symbol treeview
+- fix static symbols parsing as numbers (symbol.i)
+
 ### 1.3.1
 - Improve format string, add optional prefix
 

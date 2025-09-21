@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { readLines } from './common';
 import { log } from './outputChannel';
-import { SymbolArray, SymbolStatus } from './types/symbol';
+import { SymbolSet, SymbolStatus } from './types/symbol';
 
 const symbol_complete = /^\s(\S+)\s+(0x\S+)\s+(0x\S+)\s+(.+)$/;
 const symbol_only = /^\s(\S+)$/;
@@ -9,17 +9,22 @@ const symbol_remaining = /^\s+(0x\S+)\s+(0x\S+)\s+(.+)$/;
 const object_loads = /^(LOAD|START|END)\s/;
 const output = /^OUTPUT/;
 
-export async function parseMap(mapUri: vscode.Uri): Promise<SymbolArray> {
+type mapChapter = "start" | "discarded" | "memory_configuration" | "memory_map";
+
+export async function parseMap(mapUri: vscode.Uri): Promise<SymbolSet> {
     // log(`parsing ${mapUri.fsPath}`);
 
     const lines = await readLines(mapUri);
 
     let parsed_symbols: string[][] = [];
+    let lineNumbers: number[] = [];
 
-    let state = "start";
+    let state: mapChapter = "start";
     let previous_symbol_name = "";
 
-    for (const line of lines) {
+    for (const [lineNumber, line] of lines.entries()) {
+        if (line === "") continue;
+
         let matches;
 
         if (state === "start") {
@@ -31,6 +36,7 @@ export async function parseMap(mapUri: vscode.Uri): Promise<SymbolArray> {
         } else if (state === "discarded") {
             if (matches = symbol_complete.exec(line)) {
                 parsed_symbols.push(matches.slice(1).concat(["discarded"]));
+                lineNumbers.push(lineNumber);
 
             } else if (matches = symbol_only.exec(line)) {
                 if (previous_symbol_name === "") {
@@ -44,6 +50,7 @@ export async function parseMap(mapUri: vscode.Uri): Promise<SymbolArray> {
             } else if (matches = symbol_remaining.exec(line)) {
                 if (previous_symbol_name !== "") {
                     parsed_symbols.push([previous_symbol_name].concat(matches.slice(1), ["discarded"]));
+                    lineNumbers.push(lineNumber - 1);
                     previous_symbol_name = "";
                     // console.log("found symbol remaining %s", discarded_symbols.at(-1));
                 } else {
@@ -69,6 +76,7 @@ export async function parseMap(mapUri: vscode.Uri): Promise<SymbolArray> {
 
             } else if (matches = symbol_complete.exec(line)) {
                 parsed_symbols.push(matches.slice(1));
+                lineNumbers.push(lineNumber);
                 previous_symbol_name = "";
 
             } else if (matches = symbol_only.exec(line)) {
@@ -77,9 +85,10 @@ export async function parseMap(mapUri: vscode.Uri): Promise<SymbolArray> {
             } else if (matches = symbol_remaining.exec(line)) {
                 if (previous_symbol_name !== "") {
                     parsed_symbols.push([previous_symbol_name].concat(matches.slice(1)));
+                    lineNumbers.push(lineNumber - 1);
                     previous_symbol_name = "";
                 } else {
-                    // console.error("discarded: found remaining without previous symbol");
+                    // console.error("memory_map: found remaining without previous symbol");
                     // console.error(line);
                 }
             } else if (output.exec(line)) {
@@ -94,23 +103,26 @@ export async function parseMap(mapUri: vscode.Uri): Promise<SymbolArray> {
         }
     }
 
-    let symbols: SymbolArray = {};
+    let symbols: SymbolSet = {};
 
-    for (const matches of parsed_symbols) {
-        const splits = matches[0].split("."); // ['', 'section', 'symbol']
+    for (const [i, matches] of parsed_symbols.entries()) {
+        const splits = matches[0].split("."); // ['', 'section', 'symbol', 'number']
 
         if (splits.length < 3) { // no symbol name, only section, don't care
             continue;
         }
         const section = "." + splits[1];
-        const name = splits.at(-1)!; // take only last split
+        const name = splits.slice(2).join("."); // take everything after section
         const address = Number(matches[1]);
         const size = Number(matches[2]);
         const object = matches[3];
         const status = matches[4] === "discarded" ? SymbolStatus.discarded : SymbolStatus.used;
+        const mapFileLine = lineNumbers[i] + 1; // zero indexed
 
-        symbols[name] = { name, section, address, size, status, object };
+        symbols[name] = { type: "symbol", name, section, address, size, status, object, mapFileLine };
     }
+
+    console.log(symbols);
 
     return symbols;
 }

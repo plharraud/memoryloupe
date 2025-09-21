@@ -12,7 +12,7 @@ async function getDocumentSymbols(documentUri: vscode.Uri): Promise<vscode.Symbo
 
 const template_regex = /\$(?:\[([^\{\}]+)\])?\{(\w+)\}/g; // matches $[prefix]{key} or ${key}
 
-function formatLense(lenseFormat: string, values: { [name: string]: string | undefined }) {
+export function formatLense(lenseFormat: string, values: { [name: string]: string | undefined }) {
     return lenseFormat.replace(template_regex, (_, prefix, key) => {
         return key in values && values[key]
             ? (prefix ?? '') + values[key]
@@ -33,10 +33,6 @@ export class SymbolCodeLensProvider implements vscode.CodeLensProvider, vscode.D
 
     setEnabled(enabled: boolean) {
         this.enabled = enabled;
-    }
-
-    dispose() {
-        this._onDidChangeCodeLenses.dispose();
     }
 
     setSymbolStore(symbolStore: SymbolStore) {
@@ -72,6 +68,11 @@ export class SymbolCodeLensProvider implements vscode.CodeLensProvider, vscode.D
         });
 
         return lenses;
+    }
+
+
+    dispose() {
+        this._onDidChangeCodeLenses.dispose();
     }
 
     refresh() {
