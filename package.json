@@ -41,8 +41,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "memoryloupe.selectBuildDir",
-        "title": "memoryloupe: Select build directory"
+        "command": "memoryloupe.setBuildDir",
+        "title": "memoryloupe: Set build directory"
       },
       {
         "command": "memoryloupe.toggleCodeLenses",
@@ -64,21 +64,30 @@
         "title": "Refresh tree view"
       },
       {
-        "command": "memoryloupe.openMapfile",
+        "command": "memoryloupe.goToMapFile",
         "icon": "$(file-binary)",
         "title": "Go to .map file"
       }
     ],
     "configuration": {
       "properties": {
+        "memoryloupe.logLevel": {
+          "type": "string",
+          "anyOf": [
+            "debug",
+            "info",
+            "error"
+          ],
+          "default": "info"
+        },
         "memoryloupe.buildDir": {
           "type": "string",
           "description": "Directory to look for .map and .su files"
         },
         "memoryloupe.lenseFormat": {
           "type": "string",
-          "default": "${section} $[size: ]{size} $[stack: ]{stack} ${address} ${status}",
-          "description": "Custom codelense format string. Specify optional prefix with $[prefix]{value}\nAvailable values: name, section, address, size, status, stack"
+          "default": "${section} $[size: ]{size} $[stack: ]{stack} ${address} ${discarded}",
+          "description": "Custom codelense format string. Specify optional prefix with $[prefix]{value}\nAvailable values: name, section, address, size, discarded, stack"
         },
         "memoryloupe.codeLensesEnabled": {
           "type": "boolean",
@@ -120,12 +129,7 @@
           "group": "navigation"
         },
         {
-          "command": "memoryloupe.openMapfile",
-          "when": "view == memoryloupeTreeview",
-          "group": "navigation"
-        },
-        {
-          "command": "memoryloupe.openMapfile",
+          "command": "memoryloupe.goToMapFile",
           "when": "view == memoryloupeTreeview",
           "group": "navigation"
         }

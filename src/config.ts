@@ -1,20 +1,20 @@
-import * as vscode from 'vscode';
+import { ConfigurationChangeEvent, Uri, workspace } from 'vscode';
+import { watchers } from './watchers';
 
-
-export class ExtensionConfig {
+class ExtensionConfig {
 
     private getConfig() {
-        return vscode.workspace.getConfiguration("memoryloupe");
+        return workspace.getConfiguration("memoryloupe");
     }
 
-    setBuildDir(buildDirUri: vscode.Uri) {
+    setBuildDir(buildDirUri: Uri) {
         this.getConfig().update("buildDir", buildDirUri.fsPath, null);
     }
 
-    getBuildDir(): vscode.Uri | undefined {
+    getBuildDir(): Uri | undefined {
         const path = this.getConfig().get<string>("buildDir");
         if (path) {
-            return vscode.Uri.file(path);
+            return Uri.file(path);
         }
         return undefined;
     }
@@ -24,7 +24,7 @@ export class ExtensionConfig {
         if (lenseFormat) {
             return lenseFormat;
         }
-        return this.getConfig().inspect<string>("lenseFormat")?.defaultValue ?? "error, please define memoryloupe.lenseFormat config";
+        return this.getConfig().inspect<string>("lenseFormat")?.defaultValue ?? "error: configure memoryloupe.lenseFormat";
     }
 
     getCodeLensesEnabled(): boolean {
@@ -36,6 +36,19 @@ export class ExtensionConfig {
         this.getConfig().update("codeLensesEnabled", enabled, null);
     }
 
+    getLogLevel(): string {
+        return this.getConfig().get<string>("logLevel") ?? "info";
+    }
+
 }
 
-export const extConfig = new ExtensionConfig();
+export const config = new ExtensionConfig();
+
+export function onDidChangeConfiguration(event: ConfigurationChangeEvent) {
+    if (event.affectsConfiguration("memoryloupe.buildDir")) {
+        let buildDirUri = config.getBuildDir();
+        if (buildDirUri) {
+            watchers.setBuildDir(buildDirUri);
+        }
+    }
+}

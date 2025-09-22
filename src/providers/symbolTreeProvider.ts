@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { SymbolStore } from './symbolStore';
-import { Symbol, SymbolStatus, SymbolTreeBranchNode, SymbolTreeNode } from './types/symbol';
-import { extConfig } from './config';
-import { formatLense } from './symbolCodeLensProvider';
+import { Symbol, SymbolMap, SymbolTreeBranch, SymbolTreeNode, TreeNode } from '../types';
+import { config } from '../config';
+import { formatSymbolInfo } from '../format';
+import { symbolProvider } from './symbolProvider';
 
 export class SymbolNode extends vscode.TreeItem {
   constructor(
@@ -17,69 +17,65 @@ export class SymbolNode extends vscode.TreeItem {
 
     if (type === "symbol" && symbol) {
 
-      const lenseFormat = extConfig.getLenseFormat();
+      const lenseFormat = config.getLenseFormat();
 
-      this.description = formatLense(lenseFormat, {
+      this.description = formatSymbolInfo(lenseFormat, {
         "name": symbol.name,
         "section": symbol.section,
         "address": symbol.address ? `0x${symbol.address.toString(16)}` : undefined,
         "size": symbol.size ? `${symbol.size}B` : undefined,
-        "status": symbol.status === SymbolStatus.discarded ? 'discarded' : undefined,
+        "status": symbol.discarded ? 'discarded' : undefined,
         "stack": symbol.stack_usage ? `${symbol.stack_usage}B` : undefined,
       });
 
-      this.iconPath = new vscode.ThemeIcon("symbol-method")
-      if (source_file && symbol.line) {
+      this.iconPath = new vscode.ThemeIcon("symbol-method");
+      if (source_file && symbol.lineNumber.source) {
         this.contextValue = "symbol";
       }
     } else if (type === "object_file") {
-      this.iconPath = new vscode.ThemeIcon("file")
+      this.iconPath = new vscode.ThemeIcon("file");
     } else { // root or di
-      this.iconPath = new vscode.ThemeIcon("folder")
+      this.iconPath = new vscode.ThemeIcon("folder");
     }
   }
 }
-type TreeNode = SymbolTreeNode | Symbol;
-export class SymbolTreeProvider implements vscode.TreeDataProvider<TreeNode>, vscode.Disposable {
+
+
+
+class SymbolTreeProvider implements vscode.TreeDataProvider<TreeNode>, vscode.Disposable {
   private _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
-  private symbolStore: SymbolStore | undefined;
-  private tree: SymbolTreeBranchNode | undefined;
-
-  setSymbolStore(symbolStore: SymbolStore) {
-    this.symbolStore = symbolStore;
-    this.refresh();
-  }
+  private tree: SymbolTreeBranch | undefined;
 
   getTreeItem(el: TreeNode): vscode.TreeItem {
     if (el.type === "symbol") {
-      const source_file = el.source_file ?? this.symbolStore?.getSourceFile(el.object);
+      const source_file = el.file.source;
       return new SymbolNode(el.type, el, el.name, vscode.TreeItemCollapsibleState.None, [], source_file);
     }
     else {
-      if (el.type === "object_file")
-        return new SymbolNode(el.type, undefined, el.name, vscode.TreeItemCollapsibleState.Collapsed, Object.values(el.symbols)) // todo filer direct le set
+      if (el.type === "object_file") { return new SymbolNode(el.type, undefined, el.name, vscode.TreeItemCollapsibleState.Collapsed, Object.values(el.symbols)); } // todo filer direct le set
 
-      return new SymbolNode(el.type, undefined, el.name, vscode.TreeItemCollapsibleState.Collapsed, Object.values(el.children))
+      return new SymbolNode(el.type, undefined, el.name, vscode.TreeItemCollapsibleState.Collapsed, Object.values(el.children));
     }
   }
 
   getChildren(element?: TreeNode): TreeNode[] {
-    if (!this.tree)
+    if (!this.tree) {
       return [];
-
-    else if (!element) // root node
-      return Object.values(this.tree["children"])
-
-    else if (element.type === "object_file")
-      return Object.values(element.symbols).sort((a, b) => (b?.size ?? 0) - (a?.size ?? 0))
-
-    else if (element.type === "symbol")
-      return []; // no child
-
-    else
+    }
+    else if (!element) { // root node
+      return Object.values(this.tree["children"]);
+    }
+    else if (element.type === "object_file") {
+      return Object.values(element.symbols).sort((a, b) => (b?.size ?? 0) - (a?.size ?? 0));
+    }
+    else if (element.type === "symbol") { // no child
+      return [];
+    }
+    else {
       return Object.values(element.children);
+    }
   }
 
   dispose() {
@@ -87,13 +83,13 @@ export class SymbolTreeProvider implements vscode.TreeDataProvider<TreeNode>, vs
   }
 
   refresh(): void {
-    let syms = this.symbolStore?.getAll()!;
+    let syms = symbolProvider.getAll();
 
-    // build tree by reducing other each symbol
+    // build tree by reducing over each symbol
     let system_symbols = Object();
-    let tree: SymbolTreeBranchNode = Object.values(syms).reduce((tree, cur_symbol) => {
+    let tree: SymbolTreeBranch = syms.values().reduce((tree, cur_symbol) => {
 
-      let src = this.symbolStore?.getSourceFile(cur_symbol.object);
+      let src = cur_symbol.file.source;
 
       if (src) {
 
@@ -115,7 +111,7 @@ export class SymbolTreeProvider implements vscode.TreeDataProvider<TreeNode>, vs
         }, tree);
 
       } else {
-        system_symbols[cur_symbol.name] = cur_symbol
+        system_symbols[cur_symbol.name] = cur_symbol;
       }
       return tree;
 
@@ -126,25 +122,27 @@ export class SymbolTreeProvider implements vscode.TreeDataProvider<TreeNode>, vs
 
     // eliminate dirs with only one children
     // finds the top level of the source files
-    function eliminate(t: SymbolTreeNode): SymbolTreeBranchNode {
+    function eliminate(t: SymbolTreeNode): SymbolTreeBranch {
       if (t.type === "object_file") {
-        const newRoot: SymbolTreeBranchNode = {
+        const newRoot: SymbolTreeBranch = {
           type: "root",
           name: "root",
           children: { [t.name]: t }
-        }
+        };
         return newRoot;
       }
 
-      const children = Object.values(t["children"])
+      const children = Object.values(t["children"]);
       if (children.length > 1) {
         t["type"] = "root";
         return t;
       }
-      else return eliminate(children[0]);
+      else { return eliminate(children[0]); }
     }
 
     this.tree = eliminate(tree);
     this._onDidChangeTreeData.fire();
   }
 }
+
+export const symbolTreeProvider = new SymbolTreeProvider();
