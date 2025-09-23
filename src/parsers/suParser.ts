@@ -1,8 +1,10 @@
 import { Uri } from 'vscode';
-import { readLines } from '../common';
+import { readLines, resolveSourceFile } from '../common';
 import { logger } from '../logger';
 import { symbolProvider } from '../providers/symbolProvider';
 import { Symbol } from '../types';
+import { config } from '../config';
+import { watchers } from '../watchers';
 
 const stackusage = /^(.+):(\d+):(\d+):(\S+)\t(\d+)\t(static|dynamic|bounded)$/;
 
@@ -11,12 +13,14 @@ export async function parseSu(suUri: Uri) {
 
     const lines = await readLines(suUri);
 
+    const buildDirPath = watchers.buildDirPath; // if we parse .su we have a build dir
+
     for (const line of lines) {
         if (line === "") { continue; }
 
         const matches = stackusage.exec(line);
         if (matches) {
-            const source_file = matches[1];
+            const source_file = resolveSourceFile(buildDirPath, matches[1]);
             const lineNumber = Number(matches[2]);
             // const column = matches[3]; // ignored
             const name: string = matches[4];
@@ -27,12 +31,8 @@ export async function parseSu(suUri: Uri) {
                 type: "symbol",
                 name,
                 stack_usage,
-                lineNumber: {
-                    source: lineNumber
-                },
-                file: {
-                    source: source_file
-                }
+                sourceFile: source_file,
+                sourceLineNumber: lineNumber,
             };
 
             symbolProvider.set(s);

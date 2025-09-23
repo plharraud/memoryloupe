@@ -26,9 +26,9 @@ console.log(B.children.cc);
 console.log(M.get("cc"));
 
 let j = M.get("cc");
-j["cc"] = "CC";
-Object.assign(j, { a: "AAA" });
-M.set("cc", j);
+// j["cc"] = "CC";
+Object.assign(j, { a: "AAA", cc: "ABCD" });
+// M.set("cc", j);
 
 
 console.log(B.children.cc === M.get("cc"));

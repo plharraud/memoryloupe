@@ -3,6 +3,7 @@ import { Symbol, SymbolMap, SymbolTreeBranch, SymbolTreeNode, TreeNode } from '.
 import { config } from '../config';
 import { formatSymbolInfo } from '../format';
 import { symbolProvider } from './symbolProvider';
+import { buildSymbolTree, buildSymbolTreeFlat } from '../tree';
 
 export class SymbolNode extends vscode.TreeItem {
   constructor(
@@ -29,7 +30,7 @@ export class SymbolNode extends vscode.TreeItem {
       });
 
       this.iconPath = new vscode.ThemeIcon("symbol-method");
-      if (source_file && symbol.lineNumber.source) {
+      if (source_file && symbol.sourceLineNumber) {
         this.contextValue = "symbol";
       }
     } else if (type === "object_file") {
@@ -50,7 +51,7 @@ class SymbolTreeProvider implements vscode.TreeDataProvider<TreeNode>, vscode.Di
 
   getTreeItem(el: TreeNode): vscode.TreeItem {
     if (el.type === "symbol") {
-      const source_file = el.file.source;
+      const source_file = el.sourceFile;
       return new SymbolNode(el.type, el, el.name, vscode.TreeItemCollapsibleState.None, [], source_file);
     }
     else {
@@ -83,64 +84,8 @@ class SymbolTreeProvider implements vscode.TreeDataProvider<TreeNode>, vscode.Di
   }
 
   refresh(): void {
-    let syms = symbolProvider.getAll();
-
-    // build tree by reducing over each symbol
-    let system_symbols = Object();
-    let tree: SymbolTreeBranch = syms.values().reduce((tree, cur_symbol) => {
-
-      let src = cur_symbol.file.source;
-
-      if (src) {
-
-        src.split("/").reduce((tree_acc, current_part, i, splits) => {
-          const isLeaf = (splits.length - i) === 1;
-          if (!tree_acc["children"].hasOwnProperty(current_part)) { // current_part not yet in tree
-            if (isLeaf) { // leaf (file.c)
-              tree_acc["children"][current_part] = { type: "object_file", name: current_part, symbols: { [cur_symbol.name]: cur_symbol }, total_size: cur_symbol.size }; // create leaf object with one symbol
-            } else { // branch (dir)
-              tree_acc["children"][current_part] = { type: "directory", name: current_part, children: {} }; // create dir object
-            }
-          } else { // current_part already exists in tree
-            if (isLeaf) { // leaf (file.c)
-              tree_acc["children"][current_part]["symbols"][cur_symbol.name] = cur_symbol; // add symbol to leaf object
-              tree_acc["children"][current_part]["total_size"] += cur_symbol.size;
-            }
-          }
-          return tree_acc["children"][current_part];
-        }, tree);
-
-      } else {
-        system_symbols[cur_symbol.name] = cur_symbol;
-      }
-      return tree;
-
-    }, Object({ type: "root", children: {} }));
-
-    console.log(tree);
-    console.log(system_symbols);
-
-    // eliminate dirs with only one children
-    // finds the top level of the source files
-    function eliminate(t: SymbolTreeNode): SymbolTreeBranch {
-      if (t.type === "object_file") {
-        const newRoot: SymbolTreeBranch = {
-          type: "root",
-          name: "root",
-          children: { [t.name]: t }
-        };
-        return newRoot;
-      }
-
-      const children = Object.values(t["children"]);
-      if (children.length > 1) {
-        t["type"] = "root";
-        return t;
-      }
-      else { return eliminate(children[0]); }
-    }
-
-    this.tree = eliminate(tree);
+    // this.tree = buildSymbolTree();
+    this.tree = buildSymbolTreeFlat();
     this._onDidChangeTreeData.fire();
   }
 }

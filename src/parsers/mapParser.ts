@@ -43,7 +43,7 @@ export async function parseMap(mapUri: vscode.Uri) {
             } else if (matches = symbol_only.exec(line)) {
                 if (previous_symbol_name === "") {
                     previous_symbol_name = matches.slice(1)[0];
-                    logger.debug("found symbol only", previous_symbol_name);
+                    logger.debug("discarded: found symbol only", previous_symbol_name);
                 } else {
                     logger.error("discarded: found symbol only but previous was not handled", line);
                 }
@@ -124,12 +124,8 @@ export async function parseMap(mapUri: vscode.Uri) {
             address,
             size,
             discarded,
-            file: {
-                object
-            },
-            lineNumber: {
-                map: mapLineNumber
-            }
+            objectFile: object,
+            mapLineNumber: mapLineNumber
         };
 
         symbolProvider.set(s);

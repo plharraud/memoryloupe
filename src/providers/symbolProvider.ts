@@ -18,9 +18,12 @@ class SymbolProvider implements Disposable {
     }
 
     public set(symbol: Symbol) {
-        let s = this.symbolMap.get(symbol.name);
-        if (s) {
-            Object.assign(s, symbol); // edit object in place
+        if (this.symbolMap.has(symbol.name)) {
+            let s = this.symbolMap.get(symbol.name)!;
+            // Object.assign(s, symbol); // edit object in place, does not seem to work
+            for (const [k, v] of Object.entries(symbol)) {
+                s[k] = v;
+            }
         } else {
             this.symbolMap.set(symbol.name, symbol);
         }

@@ -64,6 +64,7 @@ npm run vsix
     - refresh button
     - see in mapfile button
     - %age of discarded per section, but it has to be robust (detect inlined etc.)
+- parser: handle *fill* and size relaxing
 - use nm and objdump to get more info
 - tests
 - use quickpicks instead of filepicker for selecting build dir

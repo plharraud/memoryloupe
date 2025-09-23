@@ -10,7 +10,8 @@ const compileCommandsGlob = "**/compile_commands.json";
 
 export class Watchers implements Disposable {
 
-    private buildDirPath!: string;
+    public buildDirPath!: string;
+    public mapFile!: Uri;
 
     private mapRelGlob!: RelativePattern;
     public mapWatcher!: FileSystemWatcher;
@@ -46,6 +47,7 @@ export class Watchers implements Disposable {
         await workspace.findFiles(this.mapRelGlob, null, 1).then(async (files) => {
             if (files.length) {
                 logger.debug("parsing", files[0].fsPath);
+                this.mapFile = files[0];
                 return parseMap(files[0]);
             }
         });

@@ -1,7 +1,7 @@
 
 export type SymbolMap = Map<string, Symbol>;
 
-export interface Symbol {
+export interface Symbol extends Record<string, any> { // must be kept flat for Object.assign to work (shallow)
     type: "symbol";
     name: string; // symbol name
     section?: string; // section from .map
@@ -9,19 +9,15 @@ export interface Symbol {
     size?: number; // symbol size in bytes
     stack_usage?: number; // stack usage in bytes from .su
     discarded?: boolean;
-    file: {
-        object?: string; // .o
-        source?: string; // .c
-    };
-    lineNumber: {
-        source?: number; // line in source file
-        map?: number; // line in .map file
-    };
+    objectFile?: string; // .o
+    sourceFile?: string; // .c
+    sourceLineNumber?: number; // line in source file
+    mapLineNumber?: number; // line in .map file
 };
 
 export interface SymbolTreeLeaf {
     type: "object_file";
-    symbols: SymbolMap;
+    symbols: Record<string, Symbol>;
     total_size: number;
     name: string;
 }

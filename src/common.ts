@@ -14,20 +14,22 @@ export async function readLines(mapFileUri: vscode.Uri): Promise<string[]> {
     return lines.map((l) => l.trimEnd()); // remove \r on windows generated files
 }
 
-export function resolveSourceFile(buildDir: vscode.Uri, filePath: vscode.Uri): vscode.Uri {
-    console.log(filePath, buildDir);
-    if (path.isAbsolute(filePath.fsPath)) { return filePath; }
-
-    const absPath = path.resolve(buildDir.fsPath, filePath.fsPath);
-    return vscode.Uri.file(absPath);
+export function resolveSourceFile(parentPath: string, filePath: string): string {
+    if (process.platform === "win32") {
+        if (path.win32.isAbsolute(filePath)) {
+            return path.win32.resolve(filePath); // in case the path is like C:/A/B/../C -> C:/A/C
+        } else {
+            return path.win32.resolve(parentPath, filePath); // resolve the file path relative to the parent
+        }
+    } else {
+        if (path.posix.isAbsolute(filePath)) {
+            return path.posix.resolve(filePath); // in case the path is like /A/B/../C -> /A/C
+        } else {
+            return path.posix.resolve(parentPath, filePath); // resolve the file path relative to the parent
+        }
+    }
 }
 
-
 export function resolveIfAbsolute(filePath: string) {
-    if (process.platform === "win32") {
-        if (path.win32.isAbsolute(filePath)) { return path.win32.resolve(filePath); }
-    } else {
-        if (path.posix.isAbsolute(filePath)) { return path.posix.resolve(filePath); }
-    }
     return filePath;
 }

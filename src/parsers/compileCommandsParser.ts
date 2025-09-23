@@ -1,6 +1,9 @@
 import { Uri, workspace } from 'vscode';
 import { logger } from '../logger';
 import { symbolProvider } from '../providers/symbolProvider';
+import { resolveSourceFile } from '../common';
+import { config } from '../config';
+import path from 'path';
 
 interface CompileCommand {
     directory: string;
@@ -29,19 +32,23 @@ export async function parseCompileCommands(compileCommandsUri: Uri) {
 
     let assocations: ObjectSourceAssociation = new Map();
 
+    const jsonDir = path.dirname(path.resolve(compileCommandsUri.fsPath)); // todo use cc.directory instead
+
     for (const el of compileCommands) {
-        if (el.output) {
-            assocations.set(el.output, el.file);
-            logger.debug("cc.json: object:", el.output, "source:", el.file);
+        if (el.output) { // .file is always there right ?
+            const sourceFilePath = resolveSourceFile(jsonDir, el.file);
+            assocations.set(el.output, sourceFilePath);
+            logger.debug("cc.json: object:", el.output, "source:", sourceFilePath);
         }
     }
 
     for (const symbol of symbolProvider.getAll().values()) {
-        if (symbol.file.object && assocations.has(symbol.file.object)) {
-            symbol.file.source = assocations.get(symbol.file.object);
-            logger.debug("found source for symbol", symbol.name, "obj:", symbol.file.object, "src:", symbol.file.source);
+        logger.debug("cc.json: associating symbol", symbol);
+        if (symbol.objectFile && assocations.has(symbol.objectFile)) {
+            symbol.sourceFile = assocations.get(symbol.objectFile);
+            logger.debug("cc.json: found source for symbol", symbol.name, "obj:", symbol.objectFile, "src:", symbol.sourceFile);
         } else {
-            logger.debug("no source found for symbol", symbol.name);
+            logger.debug("cc.json: no source found for symbol", symbol.name, symbol.objectFile);
         }
     }
 
